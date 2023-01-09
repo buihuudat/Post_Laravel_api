@@ -23,16 +23,29 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
-  Route::get('/user', [AuthController::class, 'user']);
-  Route::post('/user', [AuthController::class, 'update']);
-  Route::post('/logout', [AuthController::class, 'logout']);
+
+  Route::controller(AuthController::class)->group(
+    function () {
+      Route::get('/user', 'user');
+      Route::post('/user', 'update');
+      Route::post('/logout', 'logout');
+    }
+  );
 
   Route::resource('post', PostController::class);
 
-  Route::get('/comment/{id}', [CommentController::class, 'index']);
-  Route::post('/comment/{id}', [CommentController::class, 'store']);
-  Route::put('/comment/{id}', [CommentController::class, 'update']);
-  Route::delete('/comment/{id}', [CommentController::class, 'destroy']);
+  Route::controller(CommentController::class)->group(
+    function () {
+      Route::prefix('comment')->group(
+        function () {
+          Route::get('/{id}', 'index');
+          Route::post('/{id}', 'store');
+          Route::put('/{id}', 'update');
+          Route::delete('/{id}', 'destroy');
+        }
+      );
+    }
+  );
 
   Route::post('/post/{id}/like', [LikeController::class, 'likeOrUnlike']);
 });
